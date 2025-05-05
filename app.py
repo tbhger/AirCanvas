@@ -24,7 +24,7 @@ ALL_FINGERS_THRESH_TIME = 2.0
 THUMBS_UP_HOLD_TIME = 2.0
 
 # UI constants
-BUTTON_WIDTH = 150
+BUTTON_WIDTH = 130
 BUTTON_HEIGHT = 60
 BUTTON_MARGIN = 20
 COLOR_BOX_SIZE = 80
@@ -76,7 +76,7 @@ def initialize_fonts_and_cache():
         USE_PIL_FONTS = False
     
     # Pre-cache common text sizes
-    common_texts = ['Clear', 'Save', 'Exit', 'DRAWING AREA', 'AirCanvas']
+    common_texts = ['Clear', 'Save', 'Exit', 'Undo', 'DRAWING AREA', 'AirCanvas']
     for text in common_texts:
         for font in [FONT_SMALL, FONT_MEDIUM, FONT_LARGE]:
             cache_key = f"{text}_{font.size}"
@@ -293,20 +293,25 @@ def main():
             x += COLOR_BOX_SIZE + COLOR_BOX_MARGIN
         ui['cp_positions'] = cp_positions
         
-        # Button positions
-        x += 4*BUTTON_MARGIN
-        ui['clear_x1'], ui['clear_x2'] = x, x + BUTTON_WIDTH
+        # Button positions - all in one row to the right of color buttons
+        x_buttons = x + BUTTON_MARGIN  # Start right after color buttons
+        y_buttons = BUTTON_MARGIN  # Same Y position as colors
+        
+        # Single row buttons
+        ui['undo_x1'], ui['undo_x2'] = x_buttons, x_buttons + BUTTON_WIDTH
+        ui['clear_x1'], ui['clear_x2'] = ui['undo_x2'] + BUTTON_MARGIN, ui['undo_x2'] + BUTTON_MARGIN + BUTTON_WIDTH
         ui['save_x1'], ui['save_x2'] = ui['clear_x2'] + BUTTON_MARGIN, ui['clear_x2'] + BUTTON_MARGIN + BUTTON_WIDTH
         ui['exit_x1'], ui['exit_x2'] = ui['save_x2'] + BUTTON_MARGIN, ui['save_x2'] + BUTTON_MARGIN + BUTTON_WIDTH
-        ui['btn_y1'], ui['btn_y2'] = BUTTON_MARGIN, BUTTON_MARGIN + BUTTON_HEIGHT
         
-        # Slider
+        ui['btn_y1'], ui['btn_y2'] = y_buttons, y_buttons + BUTTON_HEIGHT
+        
+        # Slider - positioned below all buttons
         ui['sl_x1'] = BUTTON_MARGIN
         ui['sl_x2'] = ui['sl_x1'] + SLIDER_THICKNESS
         ui['sl_y1'] = ui['btn_y2'] + BUTTON_MARGIN
         ui['sl_y2'] = height - BUTTON_MARGIN
         
-        # Drawing area
+        # Drawing area - starts right below the top button row
         ui['draw_x1'] = ui['sl_x2'] + BUTTON_MARGIN
         ui['draw_y1'] = ui['sl_y1']
         ui['draw_x2'] = width - BUTTON_MARGIN
@@ -397,6 +402,8 @@ def main():
                 if col == current_color:
                     cv2.rectangle(frame, (x1, ui['btn_y1']), (x2, ui['btn_y2']), (255,255,255), 3, cv2.LINE_AA)
 
+            # Draw buttons with Undo button added
+            draw_button(frame, ui['undo_x1'], ui['btn_y1'], ui['undo_x2'], ui['btn_y2'], (80,80,80), 'Undo', alpha=0.8)
             draw_button(frame, ui['clear_x1'], ui['btn_y1'], ui['clear_x2'], ui['btn_y2'], (80,80,80), 'Clear', alpha=0.8)
             draw_button(frame, ui['save_x1'], ui['btn_y1'], ui['save_x2'], ui['btn_y2'], (80,80,80), 'Save', alpha=0.8)
             draw_button(frame, ui['exit_x1'], ui['btn_y1'], ui['exit_x2'], ui['btn_y2'], (80,80,80), 'Exit', alpha=0.8)
@@ -546,6 +553,11 @@ def main():
                             last_ui_time = now
                     
                     # Button interactions
+                    if ui['undo_x1'] <= ui_x <= ui['undo_x2'] and ui['btn_y1'] <= ui_y <= ui['btn_y2']:
+                        if strokes:
+                            strokes.pop()  # Remove the last stroke
+                        last_ui_time = now
+                    
                     if ui['clear_x1'] <= ui_x <= ui['clear_x2'] and ui['btn_y1'] <= ui_y <= ui['btn_y2']:
                         strokes.clear()
                         last_ui_time = now
@@ -610,8 +622,16 @@ def main():
             
             cv2.imshow('AirCanvas', frame)
             
+            # Check for keyboard shortcuts
+            key = cv2.waitKey(1) & 0xFF
+            
+            # Ctrl+Z for undo
+            if key == 26:  # Ctrl+Z (ASCII value 26)
+                if strokes:
+                    strokes.pop()
+            
             # Exit on ESC key
-            if cv2.waitKey(1) & 0xFF == 27:
+            if key == 27:  # ESC key
                 break
 
     cap.release()

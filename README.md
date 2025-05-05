@@ -14,6 +14,7 @@ AirCanvas is a drawing application that turns your webcam and hands into a virtu
 - **Finger Drawing**: Use thumb-index pinch gesture to draw in the air
 - **Color Palette**: Choose from 4 pre-configured colors
 - **Adjustable Brush**: Dynamic thickness control with vertical slider
+- **Undo Support**: Quickly remove your last stroke with button 
 - **SVG Export**: Save your creations as vector graphics
 - **Performance Optimized**: Specially tuned for ARM-based MacBooks
 - **Elegant UI**: Custom font support and polished visual elements
@@ -26,6 +27,17 @@ AirCanvas is a drawing application that turns your webcam and hands into a virtu
 - **PIL (Pillow)**: Custom font rendering
 - **svgwrite**: Vector graphics export
 - **NumPy**: Optimized mathematical operations
+
+### 🚀 Quick Start
+
+bash
+# Clone and setup
+git clone https://github.com/yourusername/aircanvas.git
+cd aircanvas
+pip install -r requirements.txt
+
+# Run
+python app.py
 
 ## 📋 Prerequisites
 
@@ -58,7 +70,7 @@ pip install -r requirements.txt
 
 5. Run the application:
 ```bash
-python aircanvas.py
+python app.py
 ```
 
 ## 🎯 How to Use
@@ -72,6 +84,7 @@ python aircanvas.py
 ### UI Controls
 - **Color Selection**: Tap on color squares at the top
 - **Brush Size**: Slide the vertical bar on the left
+- **Undo**: Tap the 'Undo' button
 - **Clear Canvas**: Tap the 'Clear' button
 - **Save Drawing**: Tap the 'Save' button
 - **Exit**: Tap the 'Exit' button or press ESC
@@ -103,8 +116,8 @@ python aircanvas.py
 
 ```
 aircanvas/
-├── aircanvas.py          # Main application
-├── requirements.txt      # Python dependencies
+├── app.py               # Main application
+├── requirements.txt     # Python dependencies
 ├── fonts/               # Custom fonts directory
 │   └── Bauhaus93.ttf    # Example custom font
 ├── output/              # SVG export location
